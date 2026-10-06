@@ -1,0 +1,143 @@
+{
+ "format": "sopralluogo-case/1",
+ "title": "Piazza (test)",
+ "created": "2026-10-06T16:52:29+0000",
+ "units": "metri",
+ "up": "Y",
+ "cameras": [
+  {
+   "id": "cam1",
+   "label": "piazza",
+   "video": "media/cam1.mp4",
+   "fps": 30.0,
+   "duration": 13.933333,
+   "width": 1286,
+   "height": 720,
+   "time_offset": 0.0,
+   "alignment": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "camera": {
+    "K": {
+     "fx": 1925.5369479673252,
+     "fy": 1925.5369479673252,
+     "cx": 643.0,
+     "cy": 360.0,
+     "width": 1286,
+     "height": 720
+    },
+    "pitch_deg": 5.501148423788009,
+    "roll_deg": 0.22532865828602205,
+    "height_m": 4.3839520753470325,
+    "hfov_deg": 36.93171393075108,
+    "world_from_cam": [
+     [
+      0.9999922668391932,
+      0.003932716848716997,
+      0.0,
+      0.0
+     ],
+     [
+      0.003914603844496193,
+      -0.9953865795123928,
+      -0.09586570399970838,
+      4.3839520753470325
+     ],
+     [
+      -0.00037701266933376954,
+      0.09586496265480349,
+      -0.9953942770564036,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "calibration": {
+    "method": "persone come riferimento (altezza media assunta 1.70 m)",
+    "assumed_person_height_m": 1.7,
+    "samples": 936,
+    "people": 17,
+    "inlier_ratio": 0.782051282051282,
+    "median_reprojection_px": 4.505401308491352,
+    "std_pitch_deg": 0.32708257180025185,
+    "std_roll_deg": 0.06423562144967626,
+    "std_height_m": 0.027769767570436952,
+    "focal_estimated": true,
+    "vertical_lines": 82,
+    "vertical_lines_median_px": 0.3525390877034231,
+    "std_hfov_deg": 2.1198957533243696,
+    "depth_fit_inliers": 0.8059116809116809
+   },
+   "camera_motion": {
+    "median_px": 0.10687592625617981,
+    "max_px": 0.12564823031425476,
+    "static": true
+   },
+   "mesh": {
+    "positions": "cameras/cam1/mesh_pos.f32",
+    "colors": "cameras/cam1/mesh_col.u8",
+    "indices": "cameras/cam1/mesh_idx.u32",
+    "vertices": 228719,
+    "faces": 446254,
+    "grid_stride": 2
+   },
+   "background": "cameras/cam1/background.jpg",
+   "depth_preview": "cameras/cam1/depth.png",
+   "tracks": "cameras/cam1/tracks.json",
+   "analysis": {
+    "stride_frames": 3,
+    "frames_analysed": 140
+   },
+   "evidence": {
+    "original_path": "/home/claude/piazza.mp4",
+    "file_name": "piazza.mp4",
+    "size_bytes": 1296109,
+    "sha256": "17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7",
+    "probe": {
+     "width": 1286,
+     "height": 720,
+     "fps": 30.0,
+     "duration": 13.933333,
+     "codec": "h264",
+     "has_audio": false,
+     "rotation": 0,
+     "creation_time": null
+    }
+   }
+  }
+ ],
+ "duration": 13.933333,
+ "time_start": 0.0,
+ "notes": [
+  "Misure derivate da stima monoculare: vanno verificate con almeno una misura nota sul posto.",
+  "La scala dipende dall'altezza media assunta per le persone (vedi calibration)."
+ ]
+}

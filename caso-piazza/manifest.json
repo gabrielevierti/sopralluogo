@@ -1,0 +1,142 @@
+{
+ "software": {
+  "name": "sopralluogo",
+  "version": "0.1.0",
+  "python": "3.12.3",
+  "platform": "Linux-6.18.44-fc-v70-x86_64-with-glibc2.39",
+  "opencv": "4.13.0"
+ },
+ "models": [
+  {
+   "file": "depth_anything_v2_vits_dynamic.onnx",
+   "sha256": "46c4e8eeda3a27f34701831b6a2ec7753d7b38779b215acb5633424703deed8f",
+   "source": "https://github.com/fabio-sim/Depth-Anything-ONNX/releases/download/v2.0.0/depth_anything_v2_vits_dynamic.onnx",
+   "about": "Depth Anything V2 Small (Apache-2.0) - stima di profondita' relativa da singola immagine"
+  },
+  {
+   "file": "yolo11n.onnx",
+   "sha256": "634279b40c07c6391472c51ad45b81ebc48706a9a1fe72dd3396322acd0c053b",
+   "source": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.onnx",
+   "about": "YOLO11n (AGPL-3.0, Ultralytics) - rilevamento persone e veicoli"
+  }
+ ],
+ "parameters": {
+  "title": "Piazza (test)",
+  "hfov": null,
+  "person_height": 1.7,
+  "camera_height": 3.0,
+  "no_people_calib": false,
+  "analysis_fps": 10.0,
+  "imgsz": 960,
+  "conf": 0.3,
+  "max_depth": 120.0,
+  "mesh_stride": 2,
+  "bg_frames": 60,
+  "offsets": {},
+  "audio_sync": true
+ },
+ "inputs": [
+  {
+   "original_path": "/home/claude/piazza.mp4",
+   "file_name": "piazza.mp4",
+   "size_bytes": 1296109,
+   "sha256": "17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7",
+   "probe": {
+    "width": 1286,
+    "height": 720,
+    "fps": 30.0,
+    "duration": 13.933333,
+    "codec": "h264",
+    "has_audio": false,
+    "rotation": 0,
+    "creation_time": null
+   }
+  }
+ ],
+ "outputs": [
+  {
+   "path": "cameras/cam1/background.jpg",
+   "sha256": "05f9ccecd0f9934a12731ccb0b342890c438394047f3021a405f8e09938d7df0"
+  },
+  {
+   "path": "cameras/cam1/depth.png",
+   "sha256": "843c489794cbc7b7062ea9975debed3f70ad919b66ece9d8bf1871c3d955abc4"
+  },
+  {
+   "path": "cameras/cam1/mesh_col.u8",
+   "sha256": "00c1aea38b6c060d3912f5be9b7fdce6b1e1ac8b227f31885e896af515bf0f67"
+  },
+  {
+   "path": "cameras/cam1/mesh_idx.u32",
+   "sha256": "4c6b28d9a77b7cd42498d6969b3b0e92d27fc314226a454616473fbcbcc3a529"
+  },
+  {
+   "path": "cameras/cam1/mesh_pos.f32",
+   "sha256": "b00445abbcf261c2ea1840a364d9ca61f20b4403253b1a72a77de6cafe45da40"
+  },
+  {
+   "path": "cameras/cam1/tracks.json",
+   "sha256": "38b9692980f450613d9a96fbe7d43a4b11fdaab44f657f38afba33616221352c"
+  },
+  {
+   "path": "media/cam1.mp4",
+   "sha256": "6a89beafff9194b4c32270e5f0690e14758e878246b33a4d356100d74a0801e4"
+  },
+  {
+   "path": "scene.json",
+   "sha256": "3a8ce8bbf473b139ef6019a6db005c54d3c60b0fa96bcdca5b52debc860ddb51"
+  }
+ ],
+ "started": "2026-10-06T16:52:29+0000",
+ "finished": "2026-10-06T16:53:57+0000",
+ "journal": [
+  {
+   "time": "2026-10-06T16:52:29",
+   "message": "=== Camera cam1: piazza.mp4"
+  },
+  {
+   "time": "2026-10-06T16:52:29",
+   "message": "SHA-256 originale: 17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7"
+  },
+  {
+   "time": "2026-10-06T16:52:29",
+   "message": "Creo copia di consultazione cam1.mp4 (l'originale resta intatto)"
+  },
+  {
+   "time": "2026-10-06T16:53:05",
+   "message": "  analizzati 25 fotogrammi (72/418)"
+  },
+  {
+   "time": "2026-10-06T16:53:15",
+   "message": "  analizzati 50 fotogrammi (147/418)"
+  },
+  {
+   "time": "2026-10-06T16:53:25",
+   "message": "  analizzati 75 fotogrammi (222/418)"
+  },
+  {
+   "time": "2026-10-06T16:53:35",
+   "message": "  analizzati 100 fotogrammi (297/418)"
+  },
+  {
+   "time": "2026-10-06T16:53:45",
+   "message": "  analizzati 125 fotogrammi (372/418)"
+  },
+  {
+   "time": "2026-10-06T16:53:51",
+   "message": "Rilevamento: 20 soggetti tracciati in 56 s"
+  },
+  {
+   "time": "2026-10-06T16:53:55",
+   "message": "Linee verticali della scena usate per la calibrazione: 82"
+  },
+  {
+   "time": "2026-10-06T16:53:57",
+   "message": "Calibrazione: inclinazione 5.5 deg, rollio 0.2 deg, altezza camera 4.38 m, FOV orizz. 36.9 deg, errore mediano 4.5 px su 936 osservazioni"
+  },
+  {
+   "time": "2026-10-06T16:53:57",
+   "message": "Mesh: 228719 vertici, 446254 facce"
+  }
+ ]
+}
