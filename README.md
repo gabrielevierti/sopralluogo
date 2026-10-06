@@ -1,6 +1,6 @@
 # Sopralluogo
 
-**Ricostruzione 3D misurabile di una scena a partire da uno o più video dello stesso evento.**
+**Trasforma uno o più video dello stesso evento in una scena 3D esplorabile, sincronizzata e misurabile**
 
 Sopralluogo trasforma filmati provenienti da telecamere di videosorveglianza, bodycam, smartphone o altre sorgenti video in una **scena 3D esplorabile e misurabile**, mantenendo il collegamento temporale con i filmati originali.
 
