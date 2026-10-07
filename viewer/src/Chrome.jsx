@@ -2,60 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { useStore } from "./store.js";
 import { fmtTime, fmtLen } from "./caseLoader.js";
-
-function download(name, data, type) {
-  const blob = data instanceof Blob ? data : new Blob([data], { type });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-}
-const stamp = () => new Date().toISOString().replace(/[:T]/g, "-").slice(0, 19);
-const csv = (rows) => rows.map((r) => r.map((v) => (typeof v === "string" && /[",;\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v ?? "")).join(",")).join("\n");
-
-export function exportWorkspace() {
-  const st = useStore.getState();
-  const ws = {
-    format: "sopralluogo-workspace/1",
-    saved_at: new Date().toISOString(),
-    case: st.caseData.title,
-    case_inputs_sha256: st.caseData.cameras.map((k) => k.evidence.sha256),
-    scale: st.scale, scaleRef: st.scaleRef,
-    measurements: st.measurements, bookmarks: st.bookmarks,
-  };
-  download("workspace.json", JSON.stringify(ws, null, 1), "application/json");
-}
-
-function exportSubjectsCsv() {
-  const st = useStore.getState();
-  const rows = [["camera", "soggetto", "classe", "tempo_s", "fotogramma", "x_m", "z_m", "incertezza_1sigma_m", "velocita_kmh", "altezza_m", "interpolato"]];
-  for (const k of st.caseData.cameras)
-    for (const t of k.tracks)
-      t.t.forEach((_, i) => {
-        const p = new THREE.Vector3(t.p[i][0], 0, t.p[i][1]).applyMatrix4(k.alignmentM).multiplyScalar(st.scale);
-        rows.push([k.id, t.id, t.cls, (t.tg[i] - st.caseData.timeStart).toFixed(3), t.frame[i], p.x.toFixed(3), p.z.toFixed(3),
-          (t.sigma[i] * st.scale).toFixed(3), t.speed[i] == null ? "" : (t.speed[i] * st.scale).toFixed(2),
-          t.h[i] == null ? "" : (t.h[i] * st.scale).toFixed(3), t.interp[i]]);
-      });
-  download(`soggetti-${stamp()}.csv`, csv(rows), "text/csv");
-}
-
-function exportMeasuresCsv() {
-  const st = useStore.getState();
-  const rows = [["tipo", "n", "tempo_s", "valore", "ax", "ay", "az", "bx", "by", "bz", "nota"]];
-  st.measurements.forEach((m, i) => {
-    const d = new THREE.Vector3(...m.a).distanceTo(new THREE.Vector3(...m.b)) * st.scale;
-    rows.push(["misura_m", i + 1, (m.t - st.caseData.timeStart).toFixed(3), d.toFixed(3), ...m.a.map((v) => (v * st.scale).toFixed(3)), ...m.b.map((v) => (v * st.scale).toFixed(3)), ""]);
-  });
-  st.bookmarks.forEach((b, i) => rows.push(["istante", i + 1, (b.t - st.caseData.timeStart).toFixed(3), "", "", "", "", "", "", "", b.label]));
-  download(`misure-e-istanti-${stamp()}.csv`, csv(rows), "text/csv");
-}
-
-function exportPng() {
-  const canvas = document.querySelector(".stage canvas");
-  canvas.toBlob((b) => download(`vista-3d-${stamp()}.png`, b), "image/png");
-}
+import { exportPng, exportSubjectsCsv, exportMeasuresCsv, exportWorkspace, exportReport } from "./exports.js";
+import { localSigma, scaleSigmaRel, pointWarnings, SOURCE_LABEL, TAPE_SIGMA_M } from "./uncertainty.js";
+import { runIntegrity } from "./integrity.js";
+import { IconOrbit, IconRuler, IconScale, IconCamera, IconPlan, IconOverview, IconLayers, IconExport, IconHelp, IconPresent } from "./Icons.jsx";
 
 function Menu({ label, children }) {
   const [open, setOpen] = useState(false);
@@ -75,12 +25,19 @@ function Menu({ label, children }) {
 }
 
 const LAYERS = [
+  ["generated", "Evidenzia le parti ricostruite"],
+  ["people3d", "Veicoli in 3D"],
   ["surface", "Superficie ricostruita"],
   ["points", "Nuvola di punti"],
   ["projection", "Proietta il video sulla scena"],
+  ["fadeUncertain", "Sfuma le zone viste di taglio"],
+  ["fill", "Pavimento e muri dietro gli oggetti"],
+  ["buildings", "Edifici completati"],
+  ["apron", "Pavimento attorno alla scena"],
+  ["detail", "Dettaglio del pavimento lontano"],
   ["tracks", "Soggetti"],
   ["trails", "Percorsi"],
-  ["uncertainty", "Cerchio di incertezza (2 sigma)"],
+  ["uncertainty", "Incertezza di posizione del selezionato"],
   ["frustums", "Posizione delle camere"],
   ["grid", "Griglia a 1 m"],
 ];
@@ -89,7 +46,15 @@ export function TopBar({ onClose }) {
   const c = useStore((s) => s.caseData);
   const tool = useStore((s) => s.tool);
   const layers = useStore((s) => s.layers);
-  const { setTool, toggleLayer, requestView } = useStore.getState();
+  const presenting = useStore((s) => s.presenting);
+  const personMode = useStore((s) => s.personMode);
+  const { setTool, toggleLayer, requestView, setPresenting, setDialog, setPersonMode } = useStore.getState();
+  const T = ({ id, icon: Ic, label, title }) => (
+    <button aria-pressed={tool === id} onClick={() => setTool(id)} title={title}><Ic />{label}</button>
+  );
+  const V = ({ kind, icon: Ic, label, title }) => (
+    <button onClick={() => requestView({ kind, camId: useStore.getState().selectedCam })} title={title}><Ic />{label}</button>
+  );
   return (
     <header className="topbar">
       <div className="brand">
@@ -97,30 +62,43 @@ export function TopBar({ onClose }) {
         Sopralluogo
       </div>
       <span className="case-title" title={c.source}>{c.title}</span>
+      <SealBadge />
       <span className="spacer" />
       <div className="seg" role="group" aria-label="Strumento">
-        <button aria-pressed={tool === "orbit"} onClick={() => setTool("orbit")} title="Ruota, sposta e ingrandisci la scena (V)">Esplora</button>
-        <button aria-pressed={tool === "measure"} onClick={() => setTool("measure")} title="Distanza tra due punti (M)">Misura</button>
-        <button aria-pressed={tool === "calibrate"} onClick={() => setTool("calibrate")} title="Correggi la scala con una distanza nota (K)">Calibra scala</button>
+        <T id="orbit" icon={IconOrbit} label="Esplora" title="Ruota, sposta e ingrandisci la scena (V)" />
+        <T id="measure" icon={IconRuler} label="Misura" title="Distanza tra due punti (M)" />
+        <T id="calibrate" icon={IconScale} label="Scala" title="Correggi la scala con una distanza nota (K)" />
       </div>
       <div className="seg" role="group" aria-label="Vista">
-        <button onClick={() => requestView({ kind: "camera", camId: useStore.getState().selectedCam })} title="Guarda dal punto di vista della camera (C)">Dalla camera</button>
-        <button onClick={() => requestView({ kind: "top" })} title="Pianta dall'alto (T)">Pianta</button>
-        <button onClick={() => requestView({ kind: "overview" })} title="Vista d'insieme (O)">Insieme</button>
+        <V kind="camera" icon={IconCamera} label="Camera" title="Guarda dal punto di vista della telecamera (C)" />
+        <V kind="top" icon={IconPlan} label="Pianta" title="Pianta dall'alto (T)" />
+        <V kind="overview" icon={IconOverview} label="Insieme" title="Vista d'insieme (O)" />
       </div>
-      <Menu label="Livelli">
+      <Menu label={<><IconLayers />Livelli</>}>
+        <div className="menu-note">Persone</div>
+        <div className="seg mode" role="radiogroup" aria-label="Come mostrare le persone">
+          {[["roto", "Dal video"], ["mannequin", "Manichino"], ["flat", "Sagoma piatta"]].map(([k, l]) => (
+            <button key={k} role="radio" aria-pressed={personMode === k} aria-checked={personMode === k} onClick={() => setPersonMode(k)}>{l}</button>
+          ))}
+        </div>
+        <div className="menu-note">Livelli</div>
         {LAYERS.map(([k, label]) => (
           <label key={k}><input type="checkbox" checked={layers[k]} onChange={() => toggleLayer(k)} />{label}</label>
         ))}
       </Menu>
-      <Menu label="Esporta">
-        <button onClick={exportPng}>Immagine della vista 3D (PNG)</button>
+      <Menu label={<><IconExport />Esporta</>}>
+        <button onClick={() => setDialog({ kind: "report" })}>Relazione tecnica (stampabile in PDF)</button>
+        <button onClick={exportPng}>Immagine della vista con didascalia (PNG)</button>
         <button onClick={exportSubjectsCsv}>Posizioni dei soggetti (CSV)</button>
-        <button onClick={exportMeasuresCsv}>Misure e istanti segnati (CSV)</button>
+        <button onClick={exportMeasuresCsv}>Misure con incertezza e istanti (CSV)</button>
         <button onClick={exportWorkspace}>Salva area di lavoro</button>
-        <div className="menu-note">Metti workspace.json nella cartella del caso per ritrovare misure e istanti.</div>
+        <div className="menu-note">Metti workspace.json nella cartella del caso per ritrovare misure, istanti, correzioni e registro.</div>
       </Menu>
-      <button className="btn ghost" onClick={onClose}>Chiudi caso</button>
+      <button className={`btn ${presenting ? "primary" : ""}`} onClick={() => setPresenting(!presenting)} title="Nasconde i pannelli e fa girare la scena (P)">
+        <IconPresent />{presenting ? "Esci" : "Presenta"}
+      </button>
+      <button className="btn icon-only" onClick={() => setDialog({ kind: "help" })} title="Come si usa (?)" aria-label="Aiuto"><IconHelp /></button>
+      <button className="btn ghost" onClick={onClose}>Chiudi</button>
     </header>
   );
 }
@@ -152,12 +130,19 @@ export function Dialogs() {
   const close = () => setDialog(null);
 
   if (dialog.kind === "calibrate") {
+    const c = st.caseData;
     const measured = new THREE.Vector3(...dialog.a).distanceTo(new THREE.Vector3(...dialog.b));
     const real = parseFloat(String(val).replace(",", "."));
     const ok = Number.isFinite(real) && real > 0;
+    const loc = localSigma(c, dialog.a, dialog.b, dialog.pa, dialog.pb);
+    const sigmaRel = ok ? Math.hypot(loc / measured, TAPE_SIGMA_M / real) : null;
+    const before = scaleSigmaRel(c, null);
+    const warns = [...pointWarnings(dialog.pa), ...pointWarnings(dialog.pb)];
+    const blocked = warns.some((w) => w.level === "bad");
+    const factor = ok ? real / measured : null;
     const apply = () => {
-      if (!ok) return;
-      st.setScale(real / measured, { a: dialog.a, b: dialog.b, real, measured });
+      if (!ok || blocked) return;
+      st.setScale(factor, { a: dialog.a, b: dialog.b, pa: dialog.pa, pb: dialog.pb, real, measured, sigmaRel });
       st.setTool("orbit");
       close();
     };
@@ -165,14 +150,49 @@ export function Dialogs() {
       <div className="dialog-backdrop" onClick={close}>
         <form className="dialog" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); apply(); }}>
           <h2>Distanza reale</h2>
-          <p>Nella ricostruzione questi due punti distano {fmtLen(measured)}. Quanto distano nella realta'?</p>
+          <p>Nella ricostruzione questi due punti distano {fmtLen(measured)} (punti su {SOURCE_LABEL[dialog.pa?.src ?? "unknown"]} e {SOURCE_LABEL[dialog.pb?.src ?? "unknown"]}). Quanto distano nella realta', misurati sul posto?</p>
           <input ref={inputRef} type="text" inputMode="decimal" placeholder="es. 3,20" value={val} onChange={(e) => setVal(e.target.value)} aria-label="Distanza reale in metri" />
-          {ok && <p style={{ marginTop: 10 }}>Fattore di correzione {(real / measured).toFixed(3)}: tutte le misure verranno moltiplicate per questo valore.</p>}
+          {warns.map((w, i) => <div key={i} className={w.level === "bad" ? "error" : "warn"} style={{ marginTop: 8 }}>{w.text}</div>)}
+          {ok && !blocked && (
+            <dl className="kv" style={{ marginTop: 12 }}>
+              <dt>Fattore di correzione</dt><dd>{factor.toFixed(3)} (misure {factor >= 1 ? "piu' lunghe" : "piu' corte"} del {Math.abs((factor - 1) * 100).toFixed(1)}%)</dd>
+              <dt>Incertezza di scala</dt><dd>da ±{(before * 100).toFixed(1)}% a <b>±{(sigmaRel * 100).toFixed(1)}%</b></dd>
+            </dl>
+          )}
+          {ok && !blocked && Math.abs(factor - 1) > 0.15 && <div className="warn">La scala stimata era lontana dal riferimento: controlla di aver cliccato gli estremi giusti.</div>}
+          {ok && !blocked && sigmaRel > before && <div className="warn">Questo riferimento e' meno preciso della scala stimata: scegli due punti piu' lontani tra loro o piu' vicini alla camera.</div>}
+          <p className="fine">Il riferimento migliore e' lungo, sul suolo, e vicino alla camera: lo spigolo di un marciapiede, una fila di piastrelle, la distanza tra due pali.</p>
           <div className="row">
             <button type="button" className="btn ghost" onClick={close}>Annulla</button>
-            <button type="submit" className="btn primary" disabled={!ok}>Applica scala</button>
+            <button type="submit" className="btn primary" disabled={!ok || blocked}>Applica scala</button>
           </div>
         </form>
+      </div>
+    );
+  }
+  if (dialog.kind === "report") return <ReportDialog close={close} />;
+  if (dialog.kind === "help") {
+    const rows = [
+      ["Ruotare la scena", "trascina"], ["Spostarla", "tasto destro o due dita"], ["Avvicinarsi", "rotella"],
+      ["Riproduci / pausa", "Spazio"], ["Fotogramma per fotogramma", "← →  (Maiusc: 10)"],
+      ["Misurare", "M, poi due clic"], ["Correggere la scala", "K"], ["Segnare un istante", "B"],
+      ["Vista dalla telecamera, pianta, insieme", "C  T  O"], ["Presentazione", "P"], ["Annullare / deselezionare", "Esc"],
+    ];
+    return (
+      <div className="dialog-backdrop" onClick={close}>
+        <div className="dialog wide" onClick={(e) => e.stopPropagation()}>
+          <h2>Come si usa</h2>
+          <ol className="steps">
+            <li><b>Scorri il tempo</b> con la barra in basso: video e scena 3D si muovono insieme.</li>
+            <li><b>Clicca un soggetto</b> (nella scena, nel video o nell'elenco) per vederne percorso, velocita', altezza e le inquadrature migliori.</li>
+            <li><b>Misura</b> una distanza con due clic. Per un uso ufficiale correggi prima la scala con una misura presa sul posto.</li>
+          </ol>
+          <table className="keys"><tbody>
+            {rows.map(([a, b]) => <tr key={a}><td>{a}</td><td><kbd>{b}</kbd></td></tr>)}
+          </tbody></table>
+          <p className="fine">Le persone sono ricostruite dalla loro sagoma nel video: il davanti e' il video vero, il retro (non visto dalla telecamera) e' ricostruito. Tutto cio' che e' ricostruito senza informazioni certe e' rigato in viola; l'evidenziazione si spegne da Livelli.</p>
+          <div className="row"><button className="btn primary" onClick={close}>Ho capito</button></div>
+        </div>
       </div>
     );
   }
@@ -196,4 +216,86 @@ export function Dialogs() {
     );
   }
   return null;
+}
+
+export function GeneratedLegend() {
+  const on = useStore((s) => s.layers.generated);
+  const toggle = useStore((s) => s.toggleLayer);
+  const presenting = useStore((s) => s.presenting);
+  if (presenting) return null;
+  return (
+    <button className={`legend ${on ? "" : "off"}`} onClick={() => toggle("generated")} title="Mostra o nascondi l'evidenziazione">
+      <span className="hatch" />
+      {on ? "Ricostruito senza dati certi" : "Evidenzia le parti ricostruite"}
+    </button>
+  );
+}
+
+function ReportDialog({ close }) {
+  const report = useStore((s) => s.report);
+  const integrity = useStore((s) => s.integrity);
+  const scaleRef = useStore((s) => s.scaleRef);
+  const nMeasures = useStore((s) => s.measurements.length);
+  const [r, setR] = useState(report);
+  const [verifyFirst, setVerifyFirst] = useState(integrity.status !== "ok");
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    useStore.getState().setReport(r);
+    if (verifyFirst) await runIntegrity();
+    await exportReport();
+    setBusy(false);
+    close();
+  };
+  const field = (k, label, ph, area) => (
+    <label className="field">{label}
+      {area
+        ? <textarea rows={3} value={r[k]} placeholder={ph} onChange={(e) => setR({ ...r, [k]: e.target.value })} />
+        : <input type="text" value={r[k]} placeholder={ph} onChange={(e) => setR({ ...r, [k]: e.target.value })} />}
+    </label>
+  );
+  return (
+    <div className="dialog-backdrop" onClick={busy ? undefined : close}>
+      <form className="dialog wide" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); go(); }}>
+        <h2>Relazione tecnica</h2>
+        <p>Un documento da stampare o salvare in PDF: impronta del caso, fonti, calibrazione, misure con incertezza, soggetti, registro delle operazioni e la vista attuale.</p>
+        {field("operator", "Redatta da", "nome, qualifica")}
+        {field("reference", "Riferimento", "es. numero del procedimento o della nota")}
+        {field("notes", "Oggetto", "cosa si e' voluto accertare", true)}
+        <label className="check"><input type="checkbox" checked={verifyFirst} onChange={(e) => setVerifyFirst(e.target.checked)} />Verifica l'integrita' di tutti i file prima di generarla</label>
+        {!scaleRef && <div className="warn">La scala non e' stata corretta con una misura sul posto: la relazione lo dichiarera'.</div>}
+        {nMeasures === 0 && <div className="warn">Nessuna misura: la relazione conterra' solo fonti, soggetti e registro.</div>}
+        {busy && <p role="status">{integrity.status === "running" ? `Verifica in corso: ${integrity.done} di ${integrity.total} file` : "Preparo la relazione"}</p>}
+        <div className="row">
+          <button type="button" className="btn ghost" onClick={close} disabled={busy}>Annulla</button>
+          <button type="submit" className="btn primary" disabled={busy}>Genera relazione</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/** Case fingerprint and integrity state, always visible next to the title. */
+function SealBadge() {
+  const c = useStore((s) => s.caseData);
+  const integrity = useStore((s) => s.integrity);
+  const { setPanel, setSideOpen } = useStore.getState();
+  if (!c.fingerprint) return <span className="seal none" title="Il caso non ha manifest.json: non e' verificabile">Non verificabile</span>;
+  const label = {
+    unchecked: "Da verificare",
+    running: `Verifica ${integrity.total ? Math.round((integrity.done / integrity.total) * 100) : 0}%`,
+    ok: "Integro",
+    bad: "Non integro",
+  }[integrity.status];
+  const onClick = () => {
+    setPanel("case"); setSideOpen(true);
+    if (integrity.status === "unchecked") runIntegrity();
+  };
+  return (
+    <button className={`seal ${integrity.status}`} onClick={onClick} title={`Impronta del caso (SHA-256 di manifest.json)\n${c.fingerprint}\nClic per i dettagli`}>
+      <span className="dot" aria-hidden="true" />
+      <span className="lbl">{label}</span>
+      <span className="fp">{c.fingerprint.slice(0, 8)}</span>
+    </button>
+  );
 }

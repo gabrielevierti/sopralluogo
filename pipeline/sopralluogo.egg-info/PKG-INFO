@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: sopralluogo
+Version: 0.1.0
+Summary: Ricostruzione 3D misurabile di scene riprese da video (camera fissa, multi-camera)
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.24
+Requires-Dist: opencv-contrib-python-headless<5,>=4.8
+Requires-Dist: onnxruntime>=1.17
+Requires-Dist: scipy>=1.10
+Provides-Extra: gpu
+Requires-Dist: onnxruntime-gpu>=1.17; extra == "gpu"

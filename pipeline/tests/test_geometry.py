@@ -55,3 +55,32 @@ def test_similarity():
     dst = 1.1 * src @ R.T + [3, -2]
     s, R2, t, rms = similarity_2d(src, dst)
     assert abs(s - 1.1) < 1e-9 and np.allclose(R2, R) and rms < 1e-9
+
+
+def test_color_names():
+    from sopralluogo.appearance import color_name
+    assert color_name((10, 10, 10)) == "nero"
+    assert color_name((240, 240, 240)) == "bianco"
+    assert color_name((200, 30, 30)) == "rosso"
+    assert color_name((40, 70, 170)) == "blu"
+    assert color_name((50, 140, 60)) == "verde"
+
+
+def test_vertical_planes_flatten_wall():
+    from sopralluogo.reconstruct import snap_vertical_planes
+    cam = make_cam()
+    h, w = 720, 1280
+    vs, us = np.mgrid[0:h, 0:w]
+    zg, okg = cam.ground_depth(us, vs)
+    # a wall 30 m in front of the camera (world z = -30), with noisy depth
+    T = cam.world_from_cam()
+    r = cam.rays(us, vs) @ T[:3, :3].T
+    s = (-30.0 - T[2, 3]) / r[..., 2]
+    zw = s.copy()
+    use_wall = (~okg) | (zw < zg)
+    z = np.where(use_wall, zw, zg) * (1 + np.random.default_rng(0).normal(0, 0.02, (h, w)) * use_wall)
+    z, labels, _ = snap_vertical_planes(z, okg & ~use_wall, cam)
+    wall = labels >= 2
+    assert wall.sum() > 0.5 * use_wall.sum()
+    # noise was 2% per pixel: the fitted wall must be far more accurate than that, and flat
+    assert np.allclose(z[wall], zw[wall], rtol=5e-3)

@@ -1,4 +1,4 @@
-"""Command line: sopralluogo process | sync | align | serve | models"""
+"""Command line: sopralluogo process | sync | serve | verify | models"""
 from __future__ import annotations
 
 import argparse
@@ -33,6 +33,9 @@ def main(argv=None):
     pr.add_argument("--conf", type=float, default=0.30, help="soglia di confidenza del rilevatore")
     pr.add_argument("--max-depth", type=float, default=120.0, help="profondita' massima ricostruita (m)")
     pr.add_argument("--mesh-stride", type=int, default=2, help="1 = massima densita' della superficie")
+    pr.add_argument("--reid-gap", type=float, default=4.0,
+                    help="secondi massimi di scomparsa (es. dietro un palo) per riconoscere lo stesso soggetto")
+    pr.add_argument("--no-fill", action="store_true", help="non ricostruire le zone nascoste dietro gli ostacoli")
     pr.add_argument("--bg-frames", type=int, default=60, help="fotogrammi per lo sfondo statico")
     pr.add_argument("--offset", action="append", metavar="CAM=SEC",
                     help="offset temporale manuale, es. cam2=1.35 (sostituisce la sincronizzazione audio)")
@@ -51,6 +54,13 @@ def main(argv=None):
 
     sub.add_parser("models", help="scarica i modelli (per lavorare poi offline)")
 
+    ve = sub.add_parser("verify", help="verifica che il caso non sia stato modificato")
+    ve.add_argument("case", type=Path)
+    ve.add_argument("--impronta", help="impronta del caso riportata a verbale, da confrontare")
+    ve.add_argument("--originali", nargs="*", type=Path, default=[],
+                    help="video originali da confrontare con quelli elaborati")
+    ve.add_argument("--json", action="store_true", help="esito in JSON")
+
     a = p.parse_args(argv)
     if a.cmd == "process":
         from .process import run
@@ -58,7 +68,7 @@ def main(argv=None):
             "title": a.title, "hfov": a.hfov, "person_height": a.person_height,
             "camera_height": a.camera_height, "no_people_calib": a.no_people_calib,
             "analysis_fps": a.analysis_fps, "imgsz": a.imgsz, "conf": a.conf, "max_depth": a.max_depth,
-            "mesh_stride": a.mesh_stride, "bg_frames": a.bg_frames, "offsets": _offsets(a.offset),
+            "mesh_stride": a.mesh_stride, "reid_gap": a.reid_gap, "no_fill": a.no_fill, "bg_frames": a.bg_frames, "offsets": _offsets(a.offset),
             "audio_sync": not a.no_audio_sync,
             "align_points": json.loads(a.align_points.read_text()) if a.align_points else None,
         }
@@ -73,6 +83,13 @@ def main(argv=None):
     elif a.cmd == "serve":
         from .serve import serve
         serve(a.case, a.port, not a.no_browser)
+    elif a.cmd == "verify":
+        from .integrity import format_report, verify
+        r = verify(a.case, a.originali)
+        good = r["intact"] and (not a.impronta or a.impronta.strip().lower() == r["fingerprint"])
+        print(json.dumps({**r, "matches_expected": None if not a.impronta else good}, indent=1)
+              if a.json else format_report(r, a.impronta))
+        raise SystemExit(0 if good else 2)
     elif a.cmd == "models":
         from .models import MODELS, ensure_model
         for k in MODELS:

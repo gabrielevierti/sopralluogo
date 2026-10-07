@@ -1,0 +1,2 @@
+[console_scripts]
+sopralluogo = sopralluogo.cli:main

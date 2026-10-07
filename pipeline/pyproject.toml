@@ -6,11 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "sopralluogo"
 version = "0.1.0"
 description = "Ricostruzione 3D misurabile di scene riprese da video (camera fissa, multi-camera)"
-readme = "../README.md"
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.24",
-  "opencv-python-headless>=4.8",
+  "opencv-contrib-python-headless>=4.8,<5",  # contrib: SLIC superpixels, FSR inpainting; 5.x drops readNetFromCaffe
   "onnxruntime>=1.17",
   "scipy>=1.10",
 ]

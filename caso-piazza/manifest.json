@@ -3,8 +3,8 @@
   "name": "sopralluogo",
   "version": "0.1.0",
   "python": "3.12.3",
-  "platform": "Linux-6.18.44-fc-v70-x86_64-with-glibc2.39",
-  "opencv": "4.13.0"
+  "platform": "Linux-6.18.44-fc-v77-x86_64-with-glibc2.39",
+  "opencv": "5.0.0"
  },
  "models": [
   {
@@ -18,10 +18,28 @@
    "sha256": "634279b40c07c6391472c51ad45b81ebc48706a9a1fe72dd3396322acd0c053b",
    "source": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.onnx",
    "about": "YOLO11n (AGPL-3.0, Ultralytics) - rilevamento persone e veicoli"
+  },
+  {
+   "file": "yolo11n-seg.onnx",
+   "sha256": "0bc32bc92e985b881141ef9bd2216e2a746f70519d0d24da9fc85decc4428cf4",
+   "source": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n-seg.onnx",
+   "about": "YOLO11n-seg (AGPL-3.0, Ultralytics) - sagome delle persone (rotoscoping)"
+  },
+  {
+   "file": "res10_300x300_ssd_iter_140000.caffemodel",
+   "sha256": "2a56a11a57a4a295956b0660b4a3d76bbdca2206c4961cea8efe7d95c7cb2f2d",
+   "source": "https://raw.githubusercontent.com/opencv/opencv_3rdparty/dnn_samples_face_detector_20170830/res10_300x300_ssd_iter_140000.caffemodel",
+   "about": "OpenCV res10 SSD (BSD) - rilevamento volti"
+  },
+  {
+   "file": "res10_deploy.prototxt",
+   "sha256": "dcd661dc48fc9de0a341db1f666a2164ea63a67265c7f779bc12d6b3f2fa67e9",
+   "source": "https://raw.githubusercontent.com/opencv/opencv/07e29c2ac4281bccdebedd9081a99ac48fcef2d5/samples/dnn/face_detector/deploy.prototxt",
+   "about": "Configurazione del rilevatore di volti"
   }
  ],
  "parameters": {
-  "title": "Piazza (test)",
+  "title": "Piazza (demo)",
   "hfov": null,
   "person_height": 1.7,
   "camera_height": 3.0,
@@ -31,16 +49,18 @@
   "conf": 0.3,
   "max_depth": 120.0,
   "mesh_stride": 2,
+  "reid_gap": 4.0,
+  "no_fill": false,
   "bg_frames": 60,
   "offsets": {},
   "audio_sync": true
  },
  "inputs": [
   {
-   "original_path": "/home/claude/piazza.mp4",
+   "original_path": "/home/claude/work/piazza.mp4",
    "file_name": "piazza.mp4",
-   "size_bytes": 1296109,
-   "sha256": "17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7",
+   "size_bytes": 7036804,
+   "sha256": "6a89beafff9194b4c32270e5f0690e14758e878246b33a4d356100d74a0801e4",
    "probe": {
     "width": 1286,
     "height": 720,
@@ -56,87 +76,723 @@
  "outputs": [
   {
    "path": "cameras/cam1/background.jpg",
-   "sha256": "05f9ccecd0f9934a12731ccb0b342890c438394047f3021a405f8e09938d7df0"
+   "sha256": "d59cf2940eb250324c8ef8de6836cf91b6fe8907d6bcc13c1381a06c1ac72db1",
+   "size_bytes": 151508
+  },
+  {
+   "path": "cameras/cam1/background_filled.jpg",
+   "sha256": "63438b82d5ea9728ff10f3ed777262995056ed0119cf7f7f94cafcf7686078fd",
+   "size_bytes": 133706
   },
   {
    "path": "cameras/cam1/depth.png",
-   "sha256": "843c489794cbc7b7062ea9975debed3f70ad919b66ece9d8bf1871c3d955abc4"
+   "sha256": "0151969fbf07ae547b313e2b96ce1ed5b8ecacd29d44fe57c81d9bc8a85b2cef",
+   "size_bytes": 151651
+  },
+  {
+   "path": "cameras/cam1/facade_0.jpg",
+   "sha256": "4a70494bced01f9d97e3a94089c72a8c99259ddd9dea7c1514f9f4f0c8d54b18",
+   "size_bytes": 9716
+  },
+  {
+   "path": "cameras/cam1/facade_1.jpg",
+   "sha256": "cc130ecaaa0604384d2fd7f1329a5960610e79d64358b6b77961de3d5ce797a8",
+   "size_bytes": 5028
+  },
+  {
+   "path": "cameras/cam1/fill_idx.u32",
+   "sha256": "95a7976e157a13f21400f81e21c54f9c788fc8fddb94ef48fdec296bcdf9bfc9",
+   "size_bytes": 805104
+  },
+  {
+   "path": "cameras/cam1/fill_pos.f32",
+   "sha256": "696a47ad51469df35529aeba32454d3b04d074067ef0b1b2546ae79e9235fa94",
+   "size_bytes": 430740
+  },
+  {
+   "path": "cameras/cam1/fill_q.u8",
+   "sha256": "7c575c30b49cb5b868a0c6141f5388bbda5e1a164a10e64b5d7ec351cdceaeb3",
+   "size_bytes": 35895
+  },
+  {
+   "path": "cameras/cam1/floor_detail.jpg",
+   "sha256": "dc8196c1116d8828fefaf46be52b4ed614664159a753b744c0cc09bc45c08871",
+   "size_bytes": 25949
+  },
+  {
+   "path": "cameras/cam1/masks.png",
+   "sha256": "a499ee16bc82c26645f7a244f55bb584f6e4ce6cb6f915ea9acb036be3f8f795",
+   "size_bytes": 1257175
   },
   {
    "path": "cameras/cam1/mesh_col.u8",
-   "sha256": "00c1aea38b6c060d3912f5be9b7fdce6b1e1ac8b227f31885e896af515bf0f67"
+   "sha256": "dc35dd6da92afc0572fac43facb497f9820b5ce44984ab63aacd50e0ec6e9302",
+   "size_bytes": 688233
   },
   {
    "path": "cameras/cam1/mesh_idx.u32",
-   "sha256": "4c6b28d9a77b7cd42498d6969b3b0e92d27fc314226a454616473fbcbcc3a529"
+   "sha256": "53baba36e925223d7d800b9248e27d9d91d903a2073843f4e0c11a078acd4290",
+   "size_bytes": 5294952
+  },
+  {
+   "path": "cameras/cam1/mesh_kind.u8",
+   "sha256": "ce18594c54f7388295d17fbfaa12f186292dea92a82a0338bc223f9db4efefd9",
+   "size_bytes": 229411
   },
   {
    "path": "cameras/cam1/mesh_pos.f32",
-   "sha256": "b00445abbcf261c2ea1840a364d9ca61f20b4403253b1a72a77de6cafe45da40"
+   "sha256": "07546c0f40734540e16509d1cb420e1a4cc6f7090f402c9eb88f139f0cb97954",
+   "size_bytes": 2752932
+  },
+  {
+   "path": "cameras/cam1/mesh_q.u8",
+   "sha256": "41e23af077038c6511663fca4fdb944ae39f9bff735f0718bea8e7f7af9341f1",
+   "size_bytes": 229411
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view0_body.jpg",
+   "sha256": "2232e49464fa4f206b8efcd135c535acafa1669fd0764febd29ee50bad9f7238",
+   "size_bytes": 1026
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view0_head.png",
+   "sha256": "91592dafe1dad141c6279e4be404fbf3969e489ca89855a10139f9a1c50414bd",
+   "size_bytes": 218
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view1_body.jpg",
+   "sha256": "a2b6d8e8bc1524c79cf0f99809d632506ef3a003a9bd67baa5cc3c91ce5e0862",
+   "size_bytes": 1002
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view1_head.png",
+   "sha256": "2bf22a0ca865a6c62c9f6b7ca17044aaa6ed27ca7b5abd0f8a23e2f08f564d15",
+   "size_bytes": 224
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view2_body.jpg",
+   "sha256": "744c9048cbe63dd38d3c6967c1e44538bb689f79e10addaee777f914cfcc41aa",
+   "size_bytes": 1015
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view2_head.png",
+   "sha256": "e35df7b5e5b8c3e0adee6f51eb92dc341acaa224d676054b702cfbc1e2d866c5",
+   "size_bytes": 229
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view3_body.jpg",
+   "sha256": "2c7ef18ce769054c2f3e1ea299023a3562439c7e7f17d9a5ca7d28b48b90d2e3",
+   "size_bytes": 1020
+  },
+  {
+   "path": "cameras/cam1/subjects/1/view3_head.png",
+   "sha256": "ac5c356d81400da16c8c4b8eb5c64b810420490b7edca40e54f675e2d31709f0",
+   "size_bytes": 202
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view0_body.jpg",
+   "sha256": "c00ead259e6cd1bec4b7bd4d06008c9594d790371f1bc98fd0d91c397e0748c4",
+   "size_bytes": 1309
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view0_head.png",
+   "sha256": "729b0fdca4ca542a3bdec7d533bb0cd53e73b9729766714a12f17a3b49e0240f",
+   "size_bytes": 491
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view1_body.jpg",
+   "sha256": "d578689ecb78bd74642cc3cc3079f5ad128d03de786d8204113e9723dab6fcfe",
+   "size_bytes": 1253
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view1_head.png",
+   "sha256": "587884c06b8dd28e6434e7cff6d6de1097f6547d3f461daaf998b66a1d33c439",
+   "size_bytes": 457
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view2_body.jpg",
+   "sha256": "8b58b9f7a1a67cd36247406c6c96f2e84354c7ba823fcd00fe297a5169870e5c",
+   "size_bytes": 1328
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view2_head.png",
+   "sha256": "07918a2255966b5e2e91248f15eb43219439e058e2cdf6a5a5cd7bd23b90b701",
+   "size_bytes": 543
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view3_body.jpg",
+   "sha256": "d4d504523608d29d18d13dbb36eec248f4af0bb91a5c90b9ec156226891f8be7",
+   "size_bytes": 1071
+  },
+  {
+   "path": "cameras/cam1/subjects/10/view3_head.png",
+   "sha256": "c56a189f6f5d5a9564d22314ee5d1cc305fd423ba345bb36ca4bbda7b7907d5c",
+   "size_bytes": 320
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view0_body.jpg",
+   "sha256": "5c71ad4f87b2f1c73a5962b6c5b7d3fa76a4d1fb30e1af0f35004358cf72d840",
+   "size_bytes": 1187
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view0_head.png",
+   "sha256": "285f6d3f2f335469e76d7badabb07eff8ae3750cd55e56dfed2bcef3f876447a",
+   "size_bytes": 425
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view1_body.jpg",
+   "sha256": "ff6d2548b1cb804b45ad2a00ce89c22220bc6b0112d2db107dca7ee5404ffb81",
+   "size_bytes": 1211
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view1_head.png",
+   "sha256": "a243052b153ad4720c0aada80abc87faccf56f476291a3b8e37fab7091d797ea",
+   "size_bytes": 478
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view2_body.jpg",
+   "sha256": "dfb05444bea492d2d6d3650d15a67cd4beb7729ea9eba2647f2d465b79b7ecba",
+   "size_bytes": 1141
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view2_head.png",
+   "sha256": "6d3b12f10286292686e82248e20e60601ca0acc4799dbf9acf35462245cb77b3",
+   "size_bytes": 350
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view3_body.jpg",
+   "sha256": "77123d90e46e1d24234ad5c5189a68764c4dcbbc9c1f30ae53aea56f2c49ae44",
+   "size_bytes": 1589
+  },
+  {
+   "path": "cameras/cam1/subjects/12/view3_head.png",
+   "sha256": "8ac62dd30f29d7f74034cb7886cf50dbfa69a7d264173241a8883070c8388d64",
+   "size_bytes": 513
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view0_body.jpg",
+   "sha256": "3822380ac96bdecd6871aba10a1ac7764c2bbca1b5bd37c297efc6cc011e7220",
+   "size_bytes": 4188
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view0_head.png",
+   "sha256": "5c5f1e809f161cd540ab744b1937e29f4d6dad01cef8f32e4213ec87f37564c5",
+   "size_bytes": 1761
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view1_body.jpg",
+   "sha256": "f89c032e3ef348bf1b0cc4d08b1ae1ee75f9e488f7effb34ccfa9fb2b1fa4932",
+   "size_bytes": 4319
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view1_head.png",
+   "sha256": "8548720a873d77e8a2d6c7e3a8f31ee9df6415ea198cf56877cc79cae6033afe",
+   "size_bytes": 1812
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view2_body.jpg",
+   "sha256": "49a96c1a4eb7a1f433c692334a6e1b651fd1c60e6929f3a2403486264436d911",
+   "size_bytes": 4290
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view2_head.png",
+   "sha256": "496efa9b66c0ece1b31c53fb11ca9b8f837dcd44200ed075f4c004047941e99f",
+   "size_bytes": 1771
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view3_body.jpg",
+   "sha256": "ab81d7847097bd2758c6d66a9b372881d773afd7d5d739f29214cbefd9cdc606",
+   "size_bytes": 4304
+  },
+  {
+   "path": "cameras/cam1/subjects/13/view3_head.png",
+   "sha256": "45160b6082dd4cbb2af2798a921f5e8732385ec115189723dac52d3a2d61eddb",
+   "size_bytes": 1869
+  },
+  {
+   "path": "cameras/cam1/subjects/15/view0_body.jpg",
+   "sha256": "6fecc057e0140976975a858936b61a788a0016a3702fc1bb28ec495875f372b1",
+   "size_bytes": 1644
+  },
+  {
+   "path": "cameras/cam1/subjects/15/view0_head.png",
+   "sha256": "76cf5766a65bae0ae04ddd7eca1bcd40772d06e06b811749081ac43c99e45f5a",
+   "size_bytes": 693
+  },
+  {
+   "path": "cameras/cam1/subjects/15/view1_body.jpg",
+   "sha256": "4e5ed4c0f4e56c23aad0310f80d9cb4b37830304c7611ff2e25255f0b402ea32",
+   "size_bytes": 1778
+  },
+  {
+   "path": "cameras/cam1/subjects/15/view1_head.png",
+   "sha256": "9cdd323a8dde3eee3eef6a7a85cbf2534326194e0c4fe6a8da8297d306804152",
+   "size_bytes": 706
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view0_body.jpg",
+   "sha256": "9ffac5d4ea7b6a3ce2524220c6df838e2e57c5a64e7d0854c26827d353b74596",
+   "size_bytes": 1147
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view0_head.png",
+   "sha256": "1aa2dde69fb81bd3d4a17bcb512b19cdf12879002579b9a1e7994ce2f38b62a4",
+   "size_bytes": 219
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view1_body.jpg",
+   "sha256": "a01f7846e0a6e5c761e87f99076421b3bd36937b28025b4b1ca49c0cf45edde8",
+   "size_bytes": 1109
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view1_head.png",
+   "sha256": "a90d90d7cd18aa60abc1784a18726bdfcb73ddc65bdb07353eca64677b77544c",
+   "size_bytes": 229
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view2_body.jpg",
+   "sha256": "784ce96ac45221444ee2e8bac029ac6b6f597e1ede95c0e6115eeda345e8fdc2",
+   "size_bytes": 1141
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view2_head.png",
+   "sha256": "9f3822f08bd2fa7054892856e634bd62d52bb0a81801894dcb1361a4aa328075",
+   "size_bytes": 269
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view3_body.jpg",
+   "sha256": "9dcae97c725e04c0103af6041655801c0501418a459aebdb99d6efaf094eb5ba",
+   "size_bytes": 1108
+  },
+  {
+   "path": "cameras/cam1/subjects/16/view3_head.png",
+   "sha256": "69c1931b94b1d8ba44b092c8cc676f635fb36dcfd6fccc8690776c452d7f1a10",
+   "size_bytes": 213
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view0_body.jpg",
+   "sha256": "684416d88b83b9b38bea7c1219669320cddaf6995e8d4581160637251ff1cee1",
+   "size_bytes": 5489
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view0_head.png",
+   "sha256": "98aab8b9b0f659dd10da41f8e0639e81292132d534aa36c9d019d4d05b791849",
+   "size_bytes": 2103
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view1_body.jpg",
+   "sha256": "e015d06db3df0c10b0b869640b9aefd197a9ac48c64496309fbce157cca2a8b7",
+   "size_bytes": 4101
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view1_head.png",
+   "sha256": "8131d8f58596d9fce99023cdbc8089223bf30fe7df3576489f934bbc03787e81",
+   "size_bytes": 2165
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view2_body.jpg",
+   "sha256": "c1fab7e720146f4a5eedf52b33770eee4d6ad71988d0fa5a24d589c985e57543",
+   "size_bytes": 5658
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view2_head.png",
+   "sha256": "95b01cd0fb9b1b0fce26ba5fdf14c12e29defee84acc9af952476633a7782757",
+   "size_bytes": 2188
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view3_body.jpg",
+   "sha256": "fc64bf2f9faef70aa8d28cc3c70d05732e5881db7997367ad7aca4e45d7afe18",
+   "size_bytes": 3629
+  },
+  {
+   "path": "cameras/cam1/subjects/17/view3_head.png",
+   "sha256": "c2e1adfab0ff8b06428ab2a347cbd5a4fb5243f6c74662faa832cd13313f4b34",
+   "size_bytes": 2295
+  },
+  {
+   "path": "cameras/cam1/subjects/18/view0_body.jpg",
+   "sha256": "24a62116b8cd6321d12847ecf2340c74796069269e2dbe0b94efeb7a7e8b8c50",
+   "size_bytes": 1479
+  },
+  {
+   "path": "cameras/cam1/subjects/18/view0_head.png",
+   "sha256": "3a6ee98f6f83e284e46b3d4d4af37630506bf1c4f00caa38a31e62d3c9188b5b",
+   "size_bytes": 369
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view0_body.jpg",
+   "sha256": "1257e4873866cc0b7c97289995a513d04977668434c54c8f3d2e3053593cab70",
+   "size_bytes": 913
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view0_head.png",
+   "sha256": "2d6ef2ee4c1d7106b96c6b63ced7d768a0668fed25d569e422a5bb8b10ae6f7e",
+   "size_bytes": 227
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view1_body.jpg",
+   "sha256": "c7189885ab96a49bdefa0c82d9e2a8523579120edea65f8df929abc007dc1f30",
+   "size_bytes": 1001
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view1_head.png",
+   "sha256": "f30ac6f0b0a9b5ed281ab53fe6cf80f343d4639c5f985e76728f84c2b191356c",
+   "size_bytes": 228
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view2_body.jpg",
+   "sha256": "d60801c2e143b356da440e2ef47d488a3aad3d852a6921042a1ae88485c72ac0",
+   "size_bytes": 938
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view2_head.png",
+   "sha256": "84910f1580d57cb5648927d3cd355829f42f32d852778db4b560f0cad007359c",
+   "size_bytes": 229
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view3_body.jpg",
+   "sha256": "84fada58fd583008ee216c15e1d842945e29e56b7825d17e9438c7c25f1ddf25",
+   "size_bytes": 898
+  },
+  {
+   "path": "cameras/cam1/subjects/2/view3_head.png",
+   "sha256": "733147e6d4db65cfb0e0c5bec2ac7b72e7dab297998d84251a5d2e686afe1373",
+   "size_bytes": 237
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view0_body.jpg",
+   "sha256": "32edec04337621d8ea16c1c898494ee96cab17a6dc88775c1cedef2d3e050654",
+   "size_bytes": 2352
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view0_head.png",
+   "sha256": "521ec7243a82a196e999a62985fad8337709eae9dbba5f5d0c3ecda04bee1305",
+   "size_bytes": 977
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view1_body.jpg",
+   "sha256": "3f10dd01d33c3bc6df9056fec4bb9e3a316a0952e9f89f943e9167e80b5a5954",
+   "size_bytes": 2468
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view1_head.png",
+   "sha256": "4e8b050abdca8dff15c2dff26eb3f87df82c1f8efaae467607fcaf4a45690351",
+   "size_bytes": 1016
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view2_body.jpg",
+   "sha256": "591c0692a6534b865d6308c98e82f255e1e1b9c7677d3e87b5ae62c98d0bdb44",
+   "size_bytes": 2399
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view2_head.png",
+   "sha256": "a4f765bb33556aa9d4f6476cb0d9bffc34421990bb53249f68643bdbd104c933",
+   "size_bytes": 945
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view3_body.jpg",
+   "sha256": "885d7d0d238cceeaa843fb68ba8b3ac04092263c3978652703e5eb377eb0dba6",
+   "size_bytes": 2394
+  },
+  {
+   "path": "cameras/cam1/subjects/3/view3_head.png",
+   "sha256": "b000eb7cca07ea0785124c5092e7226277819e36a2917fc9fdd102e8b5c509c8",
+   "size_bytes": 1008
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view0_body.jpg",
+   "sha256": "2ec71fc23a92ad1db2ee5aee7523d604759f3dcb1c5df50ca847319aec9f986a",
+   "size_bytes": 2152
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view0_head.png",
+   "sha256": "d20d6b58dab22d109b33ec3d35b496a1d5ff10e31c933f74cf50348c9810c9b0",
+   "size_bytes": 666
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view1_body.jpg",
+   "sha256": "3e2979af1d2d5ef46c88dfc7e54dbcfa0d207c20f6f5279d5967d56d29082581",
+   "size_bytes": 2164
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view1_head.png",
+   "sha256": "b00a6b3fdfc814c140b1732bcdd3a3c9d0b76cb415b239f0573ab977072dafc7",
+   "size_bytes": 679
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view2_body.jpg",
+   "sha256": "8dc007c93887d8595e3dc5fdc97d283791ecd65c51b4e41860c9f93d7ca3762e",
+   "size_bytes": 2111
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view2_head.png",
+   "sha256": "73fbccd5170a0b2febcf1ed3e12f9a488b558ea735b464042aef5ab1a9dd73f4",
+   "size_bytes": 649
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view3_body.jpg",
+   "sha256": "8bea44de32f24ee2380cf871b345de542b39fc3f2b874f72d025157f005e4022",
+   "size_bytes": 2071
+  },
+  {
+   "path": "cameras/cam1/subjects/4/view3_head.png",
+   "sha256": "cf5e8445664738b8ccc765ee839ebca46a9b5f0f0587dfa96ac14e84b225ace5",
+   "size_bytes": 656
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view0_body.jpg",
+   "sha256": "fcbf137117edb7ba26bdd28de33889e3bc003ccd0a52fd240722f9242f4749e6",
+   "size_bytes": 2177
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view0_head.png",
+   "sha256": "90d840659f111fb664887da201524c3e04ef58396d66b990268751c626203c34",
+   "size_bytes": 790
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view1_body.jpg",
+   "sha256": "96a319fab7e1f002a93dec5433f5e63e05059a49e3361348137fb3af170a392b",
+   "size_bytes": 2062
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view1_head.png",
+   "sha256": "8d62058146d39bd431359afd739536d46dcc42efd704f1eb059af58cde679c5e",
+   "size_bytes": 747
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view2_body.jpg",
+   "sha256": "eae6938f39bec5ee764fc84de6627ff6dab111ae441aea1c629e3bf4cb92f0ec",
+   "size_bytes": 1903
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view2_head.png",
+   "sha256": "c625a342db3e9ec1495f7f6314c988ce2d854a002f951ee65dd951e30a72bece",
+   "size_bytes": 719
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view3_body.jpg",
+   "sha256": "2dd862b363200120fdc037dca06ef8faff628a8ad4194f321441112523aa42a5",
+   "size_bytes": 2074
+  },
+  {
+   "path": "cameras/cam1/subjects/5/view3_head.png",
+   "sha256": "4f5ed3b4b5300b58246f91d07bfa61a91caf368bda982e1b4b86e664c0251a28",
+   "size_bytes": 800
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view0_body.jpg",
+   "sha256": "661ad64312983f31e8034c3be0ee54fb108870aff214e221a58a5474787e4aaf",
+   "size_bytes": 4132
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view0_head.png",
+   "sha256": "f54af55c6fd96dbd12a975d1027d6f7ea118084fec6902d237c2a5e2f7cb53d7",
+   "size_bytes": 1944
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view1_body.jpg",
+   "sha256": "8c49af186f311e9738dee93340c185d766ccce809dc3e2e0a26fb7777beaee74",
+   "size_bytes": 4076
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view1_head.png",
+   "sha256": "c1b585e8fa067a03423484f648684804c3d8137c589dcde1a650c79ea95cbed9",
+   "size_bytes": 2045
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view2_body.jpg",
+   "sha256": "3a7e98606fe92171622a82cbf8a931cd5774cd21e479e43533f62f0a1a8e7a93",
+   "size_bytes": 2672
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view2_head.png",
+   "sha256": "beccb632dbcd3b07cb77c04f69a8a60060495dd443f64f929f1b91bc78685896",
+   "size_bytes": 1291
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view3_body.jpg",
+   "sha256": "9dad7f71b5b5a49c89005d94863e3a6d8262be8f166cb9e6ba4e298fbba69058",
+   "size_bytes": 3904
+  },
+  {
+   "path": "cameras/cam1/subjects/6/view3_head.png",
+   "sha256": "126406c299566109b69026f73eb6b0573f98cb57c44997ae2f0e06890653120a",
+   "size_bytes": 1840
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view0_body.jpg",
+   "sha256": "c3719bd3c56f52827cdf53656bc4f10e66c1c130de7b6624ce67af3fe9381853",
+   "size_bytes": 4372
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view0_head.png",
+   "sha256": "19140882add453540e15369e082fee4bce91619b2a9b7dbe085f264248476190",
+   "size_bytes": 2162
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view1_body.jpg",
+   "sha256": "944e4c3a919ccf27680cd56b16c5984cf6129eeadbcf309d1889c66a0770a271",
+   "size_bytes": 4209
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view1_head.png",
+   "sha256": "0271f904b2236bd7d0cbc07edbd6d44c91da7432c829e9a4a566b81921a82607",
+   "size_bytes": 1973
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view2_body.jpg",
+   "sha256": "569455aa8d9fea341a6a045953fdf349148366adccad0b734dfd21f0a6df9f07",
+   "size_bytes": 4072
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view2_head.png",
+   "sha256": "3b660fbdd9bb223f60fb3cb9ee6bb43ccccf5a5ef96c827bf70ab0ee14daee4a",
+   "size_bytes": 1975
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view3_body.jpg",
+   "sha256": "2231a445dfa50e6d0c36edfb5bc026b2ed1b08b20a3c672e9caf525853690874",
+   "size_bytes": 3658
+  },
+  {
+   "path": "cameras/cam1/subjects/7/view3_head.png",
+   "sha256": "c11f0a1856edd21526d641e0025f1b1cfab0cb70ba571f554a9554797d92cc2f",
+   "size_bytes": 1822
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view0_body.jpg",
+   "sha256": "a31b5fc4a233cfe3007769cda1b50d93c00224ebe8600ab28a55082fddbfc2ba",
+   "size_bytes": 1641
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view0_head.png",
+   "sha256": "2a3e81ddbcb4aacf19d080eda261fdbc7d914922b805986ecc5c727d9f14fba2",
+   "size_bytes": 575
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view1_body.jpg",
+   "sha256": "e02b065987f3a4fa7e3d2c414aeb2f3f1eb497bf65697c3a7c44314c637c186c",
+   "size_bytes": 1715
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view1_head.png",
+   "sha256": "d107e1415ccd169f00594577923501a23f3bc34f34b60ca9f8adf6a30833671f",
+   "size_bytes": 562
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view2_body.jpg",
+   "sha256": "c1d3dbabc7db2eb9a22a73c7aa61c108dae0b4a4150fed5d869cac48958b0d22",
+   "size_bytes": 1483
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view2_head.png",
+   "sha256": "df185b83e716dbfd4f0f05c747aaeb0413d46b75845f3465df4e4a91421248b7",
+   "size_bytes": 549
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view3_body.jpg",
+   "sha256": "c48fb1e8e328d2e7bbf662313c70045db70ad0700e4c6099372bc69eb9d488c2",
+   "size_bytes": 1605
+  },
+  {
+   "path": "cameras/cam1/subjects/9/view3_head.png",
+   "sha256": "428644999acc82ac8cb38c9c4251d75bbc98c20e4f0491a0f9d4c6459fab555d",
+   "size_bytes": 591
   },
   {
    "path": "cameras/cam1/tracks.json",
-   "sha256": "38b9692980f450613d9a96fbe7d43a4b11fdaab44f657f38afba33616221352c"
+   "sha256": "c0261086122f6706f40affe980458e2aeaa4032ab0bcbe2cdfec4466381fa53d",
+   "size_bytes": 150883
   },
   {
    "path": "media/cam1.mp4",
-   "sha256": "6a89beafff9194b4c32270e5f0690e14758e878246b33a4d356100d74a0801e4"
+   "sha256": "8fd318a51ddc3372a793bed7c34b88639785332b2a24c45d507e42c4b26eddab",
+   "size_bytes": 6823214
   },
   {
    "path": "scene.json",
-   "sha256": "3a8ce8bbf473b139ef6019a6db005c54d3c60b0fa96bcdca5b52debc860ddb51"
+   "sha256": "68567df70ae2b0d3e33adcd069ae1536d85262df8ef82f0b3b7a5a4491d23669",
+   "size_bytes": 5054
   }
  ],
- "started": "2026-10-06T16:52:29+0000",
- "finished": "2026-10-06T16:53:57+0000",
+ "started": "2026-10-07T13:35:45+0000",
+ "finished": "2026-10-07T13:37:11+0000",
  "journal": [
   {
-   "time": "2026-10-06T16:52:29",
+   "time": "2026-10-07T13:35:45",
    "message": "=== Camera cam1: piazza.mp4"
   },
   {
-   "time": "2026-10-06T16:52:29",
-   "message": "SHA-256 originale: 17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7"
+   "time": "2026-10-07T13:35:45",
+   "message": "SHA-256 originale: 6a89beafff9194b4c32270e5f0690e14758e878246b33a4d356100d74a0801e4"
   },
   {
-   "time": "2026-10-06T16:52:29",
+   "time": "2026-10-07T13:35:45",
    "message": "Creo copia di consultazione cam1.mp4 (l'originale resta intatto)"
   },
   {
-   "time": "2026-10-06T16:53:05",
+   "time": "2026-10-07T13:36:07",
    "message": "  analizzati 25 fotogrammi (72/418)"
   },
   {
-   "time": "2026-10-06T16:53:15",
+   "time": "2026-10-07T13:36:17",
    "message": "  analizzati 50 fotogrammi (147/418)"
   },
   {
-   "time": "2026-10-06T16:53:25",
+   "time": "2026-10-07T13:36:28",
    "message": "  analizzati 75 fotogrammi (222/418)"
   },
   {
-   "time": "2026-10-06T16:53:35",
+   "time": "2026-10-07T13:36:39",
    "message": "  analizzati 100 fotogrammi (297/418)"
   },
   {
-   "time": "2026-10-06T16:53:45",
+   "time": "2026-10-07T13:36:49",
    "message": "  analizzati 125 fotogrammi (372/418)"
   },
   {
-   "time": "2026-10-06T16:53:51",
-   "message": "Rilevamento: 20 soggetti tracciati in 56 s"
+   "time": "2026-10-07T13:36:56",
+   "message": "Rilevamento: 18 tracce in 60 s"
   },
   {
-   "time": "2026-10-06T16:53:55",
-   "message": "Linee verticali della scena usate per la calibrazione: 82"
+   "time": "2026-10-07T13:37:02",
+   "message": "Linee verticali della scena usate per la calibrazione: 77"
   },
   {
-   "time": "2026-10-06T16:53:57",
-   "message": "Calibrazione: inclinazione 5.5 deg, rollio 0.2 deg, altezza camera 4.38 m, FOV orizz. 36.9 deg, errore mediano 4.5 px su 936 osservazioni"
+   "time": "2026-10-07T13:37:03",
+   "message": "Calibrazione: inclinazione 5.4 deg, rollio 0.2 deg, altezza camera 4.39 m, FOV orizz. 36.2 deg, errore mediano 4.4 px su 918 osservazioni"
   },
   {
-   "time": "2026-10-06T16:53:57",
-   "message": "Mesh: 228719 vertici, 446254 facce"
+   "time": "2026-10-07T13:37:03",
+   "message": "Tracciamento sul suolo: 24 tracce"
+  },
+  {
+   "time": "2026-10-07T13:37:03",
+   "message": "Re-identificazione: 24 tracce unite in 19 soggetti"
+  },
+  {
+   "time": "2026-10-07T13:37:05",
+   "message": "Superficie a tratti piani: suolo 39% dell'immagine, muri raddrizzati: 2"
+  },
+  {
+   "time": "2026-10-07T13:37:10",
+   "message": "Riempimento: 15.6% dell'immagine (pavimento 14.8%, muri 0.8%) ricostruito dietro gli oggetti (FSR (opencv-contrib))"
+  },
+  {
+   "time": "2026-10-07T13:37:10",
+   "message": "Mesh: 229411 vertici, 441246 facce"
+  },
+  {
+   "time": "2026-10-07T13:37:11",
+   "message": "Edifici completati come volumi: 2; trama di dettaglio del pavimento: si"
+  },
+  {
+   "time": "2026-10-07T13:37:11",
+   "message": "Rilevatore di volti non disponibile (module 'cv2.dnn' has no attribute 'readNetFromCaffe'): salto i volti"
+  },
+  {
+   "time": "2026-10-07T13:37:11",
+   "message": "Viste salvate per 19 soggetti, volti rilevati in 0 viste"
   }
  ]
 }

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "./store.js";
 import { loadCase, urlSource, filesSource } from "./caseLoader.js";
-import Scene3D from "./Scene3D.jsx";
+import Scene3D, { disposeTextures } from "./Scene3D.jsx";
 import Timeline, { stepFrame } from "./Timeline.jsx";
-import SidePanel from "./SidePanel.jsx";
+import SidePanel, { SideTab } from "./SidePanel.jsx";
 import { VideoPanel, Clock, disposeVideos } from "./Video.jsx";
-import { TopBar, ToolHint, Dialogs } from "./Chrome.jsx";
+import { TopBar, ToolHint, Dialogs, GeneratedLegend } from "./Chrome.jsx";
+import { runIntegrity } from "./integrity.js";
 
 async function readEntries(entry, prefix = "") {
   if (entry.isFile) {
@@ -109,7 +110,7 @@ function useShortcuts() {
       if (k === " ") { e.preventDefault(); st.setPlaying(!st.playing); }
       else if (k === "arrowleft") { e.preventDefault(); stepFrame(e.shiftKey ? -10 : -1); }
       else if (k === "arrowright") { e.preventDefault(); stepFrame(e.shiftKey ? 10 : 1); }
-      else if (k === "escape") { st.setTool("orbit"); st.setSelectedTrack(null); }
+      else if (k === "escape") { st.setTool("orbit"); st.setSelectedTrack(null); if (st.presenting) st.setPresenting(false); }
       else if (k === "m") st.setTool("measure");
       else if (k === "k") st.setTool("calibrate");
       else if (k === "v") st.setTool("orbit");
@@ -117,6 +118,8 @@ function useShortcuts() {
       else if (k === "t") st.requestView({ kind: "top" });
       else if (k === "o") st.requestView({ kind: "overview" });
       else if (k === "b") st.setDialog({ kind: "bookmark", t: st.time });
+      else if (k === "p") st.setPresenting(!st.presenting);
+      else if (k === "?" || k === "h") st.setDialog({ kind: "help" });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -125,6 +128,8 @@ function useShortcuts() {
 
 export default function App() {
   const caseData = useStore((s) => s.caseData);
+  const presenting = useStore((s) => s.presenting);
+  const sideOpen = useStore((s) => s.sideOpen);
   const setCase = useStore((s) => s.setCase);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -136,7 +141,16 @@ export default function App() {
       const c = await loadCase(src, setStatus);
       setStatus("");
       setCase(c);
+      for (const m of c.workspace?.merges ?? []) useStore.getState().applyMerge(m.cam, m.into, m.from, { silent: true });
       setTimeout(() => useStore.getState().requestView({ kind: "overview" }), 50);
+      // small cases are verified straight away; big ones on request (it reads every byte)
+      const sizes = c.manifest?.outputs?.map((o) => o.size_bytes);
+      if (sizes?.length && sizes.every((x) => x != null) && sizes.reduce((a, b) => a + b, 0) < 300 * 1048576)
+        setTimeout(() => runIntegrity(), 1500);
+      // first time: a short "how to" (remembered in this browser only)
+      let seen = false;
+      try { seen = localStorage.getItem("sopralluogo:help-seen") === "1"; localStorage.setItem("sopralluogo:help-seen", "1"); } catch { /* private mode */ }
+      if (!seen) setTimeout(() => useStore.getState().setDialog({ kind: "help" }), 600);
     } catch (e) {
       console.error(e);
       setStatus("");
@@ -151,14 +165,15 @@ export default function App() {
 
   if (!caseData) return <Landing onSource={open} status={status} error={error} />;
   return (
-    <div className="app">
+    <div className={`app ${presenting ? "presenting" : ""}`}>
       <Clock />
-      <TopBar onClose={() => { disposeVideos(); useStore.setState({ caseData: null, playing: false, selectedTrack: null }); }} />
+      <TopBar onClose={() => { disposeVideos(); disposeTextures(); useStore.setState({ caseData: null, playing: false, selectedTrack: null }); }} />
       <div className="stage">
         <Scene3D />
-        <SidePanel />
+        {!presenting && (sideOpen ? <SidePanel /> : <SideTab />)}
         <VideoPanel />
         <ToolHint />
+        <GeneratedLegend />
       </div>
       <Timeline />
       <Dialogs />

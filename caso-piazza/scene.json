@@ -1,7 +1,7 @@
 {
  "format": "sopralluogo-case/1",
- "title": "Piazza (test)",
- "created": "2026-10-06T16:52:29+0000",
+ "title": "Piazza (demo)",
+ "created": "2026-10-07T13:35:45+0000",
  "units": "metri",
  "up": "Y",
  "cameras": [
@@ -42,34 +42,34 @@
    ],
    "camera": {
     "K": {
-     "fx": 1925.5369479673252,
-     "fy": 1925.5369479673252,
+     "fx": 1967.1961777512404,
+     "fy": 1967.1961777512404,
      "cx": 643.0,
      "cy": 360.0,
      "width": 1286,
      "height": 720
     },
-    "pitch_deg": 5.501148423788009,
-    "roll_deg": 0.22532865828602205,
-    "height_m": 4.3839520753470325,
-    "hfov_deg": 36.93171393075108,
+    "pitch_deg": 5.388360358179055,
+    "roll_deg": 0.2040984395076701,
+    "height_m": 4.3859366970746665,
+    "hfov_deg": 36.2011145986649,
     "world_from_cam": [
      [
-      0.9999922668391932,
-      0.003932716848716997,
-      0.0,
+      0.9999936554087387,
+      0.0035621822340421074,
+      -5.421010862427522e-20,
       0.0
      ],
      [
-      0.003914603844496193,
-      -0.9953865795123928,
-      -0.09586570399970838,
-      4.3839520753470325
+      0.00354644117221189,
+      -0.9955747456154146,
+      -0.09390606289167154,
+      4.3859366970746665
      ],
      [
-      -0.00037701266933376954,
-      0.09586496265480349,
-      -0.9953942770564036,
+      -0.0003345105089015532,
+      0.09390546709608555,
+      -0.9955810621703214,
       0.0
      ],
      [
@@ -83,33 +83,134 @@
    "calibration": {
     "method": "persone come riferimento (altezza media assunta 1.70 m)",
     "assumed_person_height_m": 1.7,
-    "samples": 936,
-    "people": 17,
-    "inlier_ratio": 0.782051282051282,
-    "median_reprojection_px": 4.505401308491352,
-    "std_pitch_deg": 0.32708257180025185,
-    "std_roll_deg": 0.06423562144967626,
-    "std_height_m": 0.027769767570436952,
+    "samples": 918,
+    "people": 15,
+    "inlier_ratio": 0.7875816993464052,
+    "median_reprojection_px": 4.364051392957076,
+    "std_pitch_deg": 0.35330944521427315,
+    "std_roll_deg": 0.06791615637938096,
+    "std_height_m": 0.03006291387004192,
     "focal_estimated": true,
-    "vertical_lines": 82,
-    "vertical_lines_median_px": 0.3525390877034231,
-    "std_hfov_deg": 2.1198957533243696,
-    "depth_fit_inliers": 0.8059116809116809
+    "vertical_lines": 77,
+    "vertical_lines_median_px": 0.3393234912998604,
+    "std_hfov_deg": 2.2971281064486644,
+    "depth_fit_inliers": 0.8024691358024691
    },
    "camera_motion": {
-    "median_px": 0.10687592625617981,
-    "max_px": 0.12564823031425476,
+    "median_px": 0.11134319007396698,
+    "max_px": 0.13116048276424408,
     "static": true
    },
    "mesh": {
     "positions": "cameras/cam1/mesh_pos.f32",
     "colors": "cameras/cam1/mesh_col.u8",
+    "quality": "cameras/cam1/mesh_q.u8",
+    "kind": "cameras/cam1/mesh_kind.u8",
     "indices": "cameras/cam1/mesh_idx.u32",
-    "vertices": 228719,
-    "faces": 446254,
+    "vertices": 229411,
+    "faces": 441246,
+    "grid_stride": 2
+   },
+   "fill": {
+    "positions": "cameras/cam1/fill_pos.f32",
+    "indices": "cameras/cam1/fill_idx.u32",
+    "quality": "cameras/cam1/fill_q.u8",
+    "texture": "cameras/cam1/background_filled.jpg",
+    "filled_ratio": 0.15597675825125282,
+    "floor_ratio": 0.14813266804907552,
+    "wall_ratio": 0.007844090202177294,
+    "color_method": "FSR (opencv-contrib)",
+    "vertices": 35895,
+    "faces": 67092,
     "grid_stride": 2
    },
    "background": "cameras/cam1/background.jpg",
+   "buildings": [
+    {
+     "vegetation": 0.0,
+     "footprint": [
+      [
+       -1.2325298516146397,
+       -46.229152325180955
+      ],
+      [
+       5.123771455052944,
+       -27.773714832628023
+      ],
+      [
+       16.197033950584697,
+       -31.587495616628573
+      ],
+      [
+       9.840732643917114,
+       -50.042933109181504
+      ]
+     ],
+     "height": 6.281167958115265,
+     "color": [
+      106,
+      122,
+      103
+     ],
+     "facade_length_m": 19.52,
+     "depth_m": 11.71,
+     "people_inside": 0,
+     "texture": "cameras/cam1/facade_0.jpg"
+    },
+    {
+     "vegetation": 0.0,
+     "footprint": [
+      [
+       4.783987822727088,
+       -26.488969088403515
+      ],
+      [
+       10.519945090121803,
+       -32.71931786904038
+      ],
+      [
+       6.105784212459675,
+       -36.78320563153052
+      ],
+      [
+       0.3698269450649594,
+       -30.552856850893654
+      ]
+     ],
+     "height": 6.356959841958151,
+     "color": [
+      70,
+      69,
+      54
+     ],
+     "facade_length_m": 8.47,
+     "depth_m": 6.0,
+     "people_inside": 0,
+     "texture": "cameras/cam1/facade_1.jpg"
+    }
+   ],
+   "floor_detail": {
+    "texture": "cameras/cam1/floor_detail.jpg",
+    "tile_m": 6.0,
+    "floor_rgb": [
+     141,
+     160,
+     133
+    ]
+   },
+   "masks": {
+    "atlas": "cameras/cam1/masks.png",
+    "cols": 64,
+    "cell": [
+     32,
+     64
+    ],
+    "count": 1023,
+    "size": [
+     2048,
+     1024
+    ]
+   },
    "depth_preview": "cameras/cam1/depth.png",
    "tracks": "cameras/cam1/tracks.json",
    "analysis": {
@@ -117,10 +218,10 @@
     "frames_analysed": 140
    },
    "evidence": {
-    "original_path": "/home/claude/piazza.mp4",
+    "original_path": "/home/claude/work/piazza.mp4",
     "file_name": "piazza.mp4",
-    "size_bytes": 1296109,
-    "sha256": "17b3ecdfd97abd9db71216bee3ba13c3bc33d786ff007109e45c4ed0891df9f7",
+    "size_bytes": 7036804,
+    "sha256": "6a89beafff9194b4c32270e5f0690e14758e878246b33a4d356100d74a0801e4",
     "probe": {
      "width": 1286,
      "height": 720,

@@ -100,7 +100,7 @@ export default function Timeline() {
             </Row>
           ))}
           {tracks.map((t) => (
-            <Row key={t.key} label={`${c.cameras.length > 1 ? t.camId + "/" : ""}${t.id} ${t.cls}`} onDown={onDown}
+            <Row key={t.key} label={`${c.cameras.length > 1 ? t.camId + " " : ""}Soggetto ${t.id}`} onDown={onDown}
               active={selectedTrack === t.key}>
               <div
                 className={`lane-bar ${selectedTrack === t.key ? "sel" : ""}`}
