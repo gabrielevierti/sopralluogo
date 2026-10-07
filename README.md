@@ -1,27 +1,12 @@
 # Sopralluogo
 
-
-https://github.com/user-attachments/assets/4dd517ec-5486-43b3-99e1-ec0d2df26c7b
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4dd517ec-5486-43b3-99e1-ec0d2df26c7b" alt="Sopralluogo">
+</p>
 
 <p align="center">
   <strong>Trasforma uno o più video dello stesso evento in una scena 3D esplorabile, sincronizzata e misurabile.</strong>
 </p>
-
-<p align="center">
-  <a href="https://github.com/gabrielevierti/sopralluogo">
-    <img src="https://img.shields.io/github/stars/gabrielevierti/sopralluogo?style=for-the-badge" alt="GitHub Stars">
-  </a>
-  <a href="https://github.com/gabrielevierti/sopralluogo">
-    <img src="https://img.shields.io/github/license/gabrielevierti/sopralluogo?style=for-the-badge" alt="License">
-  </a>
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
-  <img src="https://img.shields.io/badge/FFmpeg-required-007808?style=for-the-badge&logo=ffmpeg&logoColor=white" alt="FFmpeg">
-  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows-555555?style=for-the-badge" alt="Platforms">
-  <img src="https://img.shields.io/badge/Privacy-local--first-111111?style=for-the-badge" alt="Local First">
-</p>
-
----
 
 ## Overview
 
