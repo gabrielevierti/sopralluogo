@@ -1,10 +1,6 @@
 # Sopralluogo
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4dd517ec-5486-43b3-99e1-ec0d2df26c7b" alt="Sopralluogo">
-</p>
-
-<p align="center">
   <strong>Trasforma uno o più video dello stesso evento in una scena 3D esplorabile, sincronizzata e misurabile.</strong>
 </p>
 
